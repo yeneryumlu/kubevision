@@ -1,0 +1,38 @@
+<script>
+import axios from 'axios';
+
+export default {
+    data() {
+        return {
+            namespaces: {}
+        };
+    },
+    mounted() {
+        const clusterPromises = axios
+            .get('http://localhost:5001/namespace')
+            .then(response => (this.namespaces = response.data));
+    },
+    methods: {
+    }
+};
+</script>
+
+
+<template>
+    <v-table density="compact" fixed-header height="600">
+        <thead>
+            <tr>
+                <th class="text-left">Name</th>
+                <th class="text-left">Clusters</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item in namespaces" :key="item.name">
+                <td>{{ item.name }}</td>
+                <td>{{ item.clusterlist }}</td>
+            </tr>
+        </tbody>
+    </v-table>
+</template>
+
+

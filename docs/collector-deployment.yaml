@@ -1,0 +1,42 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJkb2NrZXIuaW8iOnsidXNlcm5hbWUiOiJ5ZW5lcnl1bWx1IiwicGFzc3dvcmQiOiJkY2tyX3BhdF9IemdkTmJEU2xHRzQzRzE5OGJfeW01VjF5UzAiLCJlbWFpbCI6InllbmVyeXVtbHVAZ21haWwuY29tIiwiYXV0aCI6ImVXVnVaWEo1ZFcxc2RUcGtZMnR5WDNCaGRGOUllbWRrVG1KRVUyeEhSelF6UnpFNU9HSmZlVzAxVmpGNVV6QT0ifX19
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-configmap
+data:
+    url: 'http://localhost:30000'
+    cluster_name: theta
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector-deployment
+  labels:
+    app: collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collector
+  template:
+    metadata:
+      labels:
+        app: collector
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: collector
+          image: yeneryumlu/collector:0.0.23
+          envFrom:
+            - configMapRef:
+                name: collector-configmap
+#        ports:
+#        - containerPort: 80

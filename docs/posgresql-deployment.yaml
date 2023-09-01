@@ -1,0 +1,78 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJkb2NrZXIuaW8iOnsidXNlcm5hbWUiOiJ5ZW5lcnl1bWx1IiwicGFzc3dvcmQiOiJkY2tyX3BhdF9IemdkTmJEU2xHRzQzRzE5OGJfeW01VjF5UzAiLCJlbWFpbCI6InllbmVyeXVtbHVAZ21haWwuY29tIiwiYXV0aCI6ImVXVnVaWEo1ZFcxc2RUcGtZMnR5WDNCaGRGOUllbWRrVG1KRVUyeEhSelF6UnpFNU9HSmZlVzAxVmpGNVV6QT0ifX19
+kind: Secret
+metadata:
+  name: regcred
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-data
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: /data/
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-data
+spec:
+  volumeName: pv-data
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-deployment
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-data
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: postgresql
+          image: postgres
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: POSTGRES_PASSWORD
+              value: '123456'
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-service
+spec:
+  selector:
+    app: postgresql
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
