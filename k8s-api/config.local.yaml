@@ -1,0 +1,9 @@
+envvars:
+  runtime.iscontainer: 'False'
+  log.level: 'INFO'
+  user: postgres
+  password: '123456'
+  host: localhost
+  port: '5432'
+  dbname: postgres
+  db.drop_all: 'False'

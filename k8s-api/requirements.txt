@@ -1,0 +1,7 @@
+Flask
+flask-restx
+psycopg2-binary
+python-json-logger
+sqlalchemy
+pyyaml
+flask-cors
